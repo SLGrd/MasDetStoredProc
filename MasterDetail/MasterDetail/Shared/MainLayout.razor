@@ -1,0 +1,19 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>MasterDetail</PageTitle>
+<div class="page">
+    <!-- Sidebar Menu -->
+    <div class="sidebar" style="background-image:linear-gradient(to bottom right, #001100, #55555f)">        
+        <NavMenu />
+    </div>
+
+    <!-- Single Page Area -->
+    <div class="container-fluid m-0 p-0 vh-100" style="background-color:@CorDeFundo; color:@CorDoTexto; border-style:double;border-color:white">        
+        @Body       
+    </div>
+</div>
+
+@code{
+    string CorDeFundo = "white";
+    string CorDoTexto = "black";
+}

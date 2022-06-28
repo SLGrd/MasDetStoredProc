@@ -1,0 +1,332 @@
+﻿@page "/showModel"
+@using Common;
+@using Common.Data
+@using Common.Models;
+@using System.Reflection
+
+<!--  Browser tab title  -->
+<PageTitle>Show Master & Detail</PageTitle>
+
+ <!-- Greeting Message -->
+ <TopBanner BannerTxt="Build and Show Model"></TopBanner> <!-- https://youtu.be/QxIVYifXks0 -->
+
+<div class="container h70 CenterCol">       
+    <div class="row estilo round-border" style="background-image:linear-gradient(to bottom right, #003300 40%, #005b00 60% );">
+        <div class="col-8 InvBanner StartRow m-0" >
+            <h3>Importadora South Winds - Invoice</h3>
+        </div>
+        <div class="col-2 flexCol m-0">
+            <label>Number</label>
+            <input type="number" disabled style="width:90%;text-align:center;" @bind="Inv.Header!.InvoiceNumber" />                
+        </div>
+        <div class="col-2 flexCol m-0">
+            <label>Date</label>
+            <input type="date"  disabled=@NoEdit style="width:96%;" @bind="Inv.Header.InvoiceDate" /> 
+        </div>
+    </div>
+        
+    <div class="row estilo p-2" style="border-style:solid;border-top:none;">              
+        <div class="col-8 flexCol" >
+            <label>Cliente</label>
+            <input type="text"  disabled=@NoEdit style="width:98%" @bind="Inv.Header.Buyer" />                
+        </div>
+        <div class="col-2 flexCol">
+            <label>CPF </label>
+            <input type="Text"  disabled=@NoEdit style="width:98%" @bind="Inv.Header.Cpf" />               
+        </div>
+            <di class="col-2 flexCol">
+            <label>Phone</label>
+            <input type="Text"  disabled=@NoEdit style="width:98%" @bind="Inv.Header.Phone" />                
+        </di>
+        <div class="col-8 flexCol">
+            <label>Address</label>
+            <input type="Text"  disabled=@NoEdit style="width:98%" @bind="Inv.Header.Address" />                
+        </div>
+        <div class="col-2 flexCol">
+            <label>Complemento</label>
+            <input type="Text"  disabled=@NoEdit style="width:98%" @bind="Inv.Header.Complto"/>                
+        </div>
+        <div class="col-2 CenterRow">   
+            <i class="fas fa-undo-alt  fa-2x" style="color:blue" hidden=@NoEdit @onclick="UndoInvoiceChanges" /> 
+            <i class="far fa-trash-alt fa-2x" style="color:red"  hidden=@NoEdit @onclick="DeleteInvoice" data-bs-toggle="modal" data-bs-target="#myModal" />                                      
+        </div>     
+    </div>
+        
+    <!-- Show edition pad -->
+    @if (wrkLine is not null)
+    {           
+        <div class="row estilo fadeBorder @fade m-0 p-0" style="">                   
+            <div class="col-1 flexCol" style="padding-left:6px;">
+                <label>Item</label>
+                <input type="number" style="width:100%;text-align:center;" @bind=@wrkLine.ItemNumber />            
+            </div>
+            <div class="col-4 flexCol">
+                <label>Description</label>
+                <input type="Text" style="width:100%;text-align:left;"    @bind=@wrkLine.Description />               
+            </div>
+            <div class="col-1 flexCol">  
+                <label>Qtty</label>
+                <input type="number" style="width:100%;text-align:right;"   @bind=@wrkLine.Qtty /> 
+            </div>
+            <div class="col-2 flexCol">
+                <label>Unit Price</label>
+                <input type="number" name="number" pattern="([0-9]{1,1}).([0-9]{2})" style="width:100%;text-align:right;"   @bind=@wrkLine.UnitPrice />                
+            </div>
+            <div class="col-2 flexCol">
+                <label>Unit Price</label>
+                <input type="Text" style="width:100%;text-align:right;"   value=@((wrkLine.UnitPrice * wrkLine.Qtty).ToString("N2")) />                
+            </div>
+            <div class="col-2 CenterRow justify-content-between mt-3">                    
+                <!-- Line new, Update and Delete buttons -->
+                <img src="Icons/file_32px.png"                @onclick="@(()=> AddNewLine())" />   
+                <img src="Icons/undo_32px.png"                @onclick="@(()=> UndoLine())" /> 
+                <img src="Icons/downloading_updates_26px.png" @onclick="@(()=> UpdateLine( wrkLine))" />
+                <img src="Icons/trash_can_32px.png"           @onclick="@(()=> ConfirmDeleteLine())"   data-bs-toggle="modal" data-bs-target="#myModal"/>             
+            </div> 
+        </div>         
+    } 
+
+    <!-- Move records to table-->
+    <div class="row estilo m-0 p-0" style="background-color:whitesmoke;border-style:solid;border-top:none;" >
+        <div class="col-12 mt-2 flexCol p-2">
+            <table class="table table-bordered table-secondary" >
+                <thead>
+                    <tr>
+                        <th style="text-align:center">Item</th>
+                        <th style="text-align:center">Description</th>
+                        <th style="text-align:center">Qtty</th>
+                        <th style="text-align:center">Unit Price</th>
+                        <th style="text-align:center">Total</th>
+                        <th style="text-align:center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (InvoiceLine L in Inv.Lines!)
+                    {
+                        <tr>
+                            <td style="text-align:right">@L.ItemNumber</td>
+                            <td style="text-align:left" >@L.Description</td>
+                            <td style="text-align:right">@L.Qtty.ToString("N0")</td>
+                            <td style="text-align:right">@L.UnitPrice.ToString("N2")</td>
+                            <td style="text-align:right">@((L.Qtty * L.UnitPrice).ToString("N2"))</td>
+                            <td style="text-align:center;color:lightyellow"> 
+                                <!-- Copies line to Update pad -->
+                                <img src="Icons/maintenance_32px.png" hidden=@NoEdit @onclick="@(()=> Copy2Pad( L))" />
+                            </td>
+                        </tr>
+                    }               
+                </tbody>
+            </table>
+        </div>
+        <div class="col-12 CenterRow pb-2 pt-2">                
+            <button type="button" class="btn btn-labeled btn-primary btn-sm" @onclick="AddNewInvoice" > Insert New Invoice   </button>
+            <button type="button" class="btn btn-labeled btn-primary btn-sm" @onclick="EditionMode"   > Edit Current Invoice </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog"> <!-- Veja o video https://www.youtube.com/watch?v=IGzDf3dSSAQ&t=647s -->
+    <div class="modal-dialog">    
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Master / Detail</h4>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>          
+            </div>
+            <div class="modal-body">
+                <p>@ModalText</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-labeled btn-danger"  data-bs-dismiss="modal" @onclick="DeleteLine">Confirm DELETE</button>
+                <button type="button" class="btn btn-labeled alert-light" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>      
+    </div>
+</div>
+
+<style>
+    .h20 { height: 20%; }
+    .h30 { height: 30%; }
+    .h60 { height: 60%; }
+    .h70 { height: 70%; }
+    .h90 { height: 90%; }
+    .h100 { height: 100%; }
+    h2 {         
+        font-family : 'Montserrat';
+        font-size: 2em;
+    }
+    h3 {         
+        font-family : 'Montserrat';
+        font-size: 1.5em;
+    }
+    .estilo{   
+        width: 100%;
+        border-width:   2px;
+        border-style:   solid;
+        border-top:     none;
+        border-color:   green;
+        padding-bottom: 6px;             
+    }
+    .fadeBorder{        
+        border-left:    solid 2px green;
+        border-right:   solid 2px green;
+        border-bottom:  none;
+        border-top:     none;
+        background-color:    lightgreen;        
+    }
+    .fadein{        
+        height:              0px;
+        transition:          height;
+        transition-delay :   200ms;
+        transition-duration: 1200ms;     
+        border-bottom:       none;
+    }
+    .fadeout{
+        height:              68px;
+        transition:          height;
+        transition-delay :   200ms;
+        transition-duration: 1800ms;    
+        border-bottom:       solid 1px red;
+    }        
+    .round-border{
+        border: solid 1px green;
+        border-top-left-radius:10px;
+        border-top-right-radius:10px;
+    }
+    .StartRow{
+        display:         flex;
+        flex-direction:  row;
+        align-items:     center;
+        justify-content: start ;
+    }
+    .StartCol{
+        display:         flex;
+        flex-direction:  column;
+        align-items:     start;
+        justify-content: center;
+    }
+    .CenterCol{
+        display:         flex;
+        flex-direction:  column;
+        align-items:     center;
+        justify-content: center;
+    }
+    .CenterRow{
+        display:         flex;
+        flex-direction:  row;
+        align-items:     center;
+        justify-content: space-around;
+    }
+    .InvBanner{        
+        height: 60px;        
+        color:  white;
+        padding-top:   15px;
+        padding-left:  27px;
+    }
+    .flexCol{          
+        display:         flex;
+        flex-direction:  column;
+        margin:          0;
+        padding:         0;
+        align-items:     start;
+        justify-content: center;
+        color:           black;
+    }
+    label{
+        font-size: 12px;
+        color : red;
+        margin: 0px;
+    }
+    table tbody tr:hover{
+        color:red;
+    }
+</style>
+
+@code{
+    //  Populates model with hard coded sample data
+    public Invoice Inv { get; set; } = SampleData.CreateInvoice();
+    public Invoice? savedInvoice = new(new InvoiceHeader(), new List<InvoiceLine>());
+
+    private InvoiceLine? wrkLine;
+    private InvoiceLine? CurrentListLine ;
+
+    private bool   NoEdit = true;
+    private string fade   = "fadein";
+
+    private string ModalText = "Confirma exclusão do pedido ?";
+
+    protected override void OnInitialized()
+    {
+        wrkLine   = new( new Guid());
+        base.OnInitialized();
+    }
+
+    private void EditionMode()
+    {
+        NoEdit = !NoEdit;
+        fade = (NoEdit ? "fadein" : "fadeout");
+
+        wrkLine   = new( new Guid());
+        //  Save Original invoice values
+        SaveClassA2B(Inv, savedInvoice!);
+    }
+
+    private void Copy2Pad(InvoiceLine L)
+    {
+        SaveLine( L, wrkLine!);
+        CurrentListLine = L;   <!-- Veja o video sobre reference e value https://youtu.be/s6oI1yRbrRE -->
+    }
+
+    private void AddNewLine()
+    {
+        wrkLine = new( Inv.Header!.Gid);  
+        CurrentListLine = new( Inv.Header!.Gid); 
+        Inv.Lines!.Add( CurrentListLine);
+    }
+
+    private void UndoLine() =>  SaveLine( CurrentListLine!, wrkLine!);                   
+
+    public void UpdateLine( InvoiceLine wrk) =>  SaveLine( wrk, CurrentListLine!);
+
+    private void ConfirmDeleteLine() => ModalText = "Confirma exclusão da linha do pedido ?";
+
+    private void DeleteLine() => Inv.Lines!.Remove( CurrentListLine!);  
+
+    private void UndoInvoiceChanges() => SaveClassA2B( savedInvoice!, Inv);   
+
+    private void DeleteInvoice() => Inv = new(new InvoiceHeader(), new List<InvoiceLine>()); 
+
+    private void AddNewInvoice() => Inv = new(new InvoiceHeader(), new List<InvoiceLine>()); 
+
+    private void SaveLine( InvoiceLine a, InvoiceLine b)
+    {
+        foreach( var p in a!.GetType().GetProperties())
+        {
+            PropertyInfo q = b!.GetType().GetProperty( p.Name)!;
+            q.SetValue( b, p.GetValue( a, null), null);
+        }  
+    }
+
+    private void SaveClassA2B( Invoice A, Invoice B)
+    {
+        foreach( var p in A.Header!.GetType().GetProperties())
+        {
+            PropertyInfo q = B.Header!.GetType().GetProperty( p.Name)!;
+            q.SetValue( B.Header, p.GetValue( A.Header, null), null);
+        }
+
+        B.Lines!.Clear();
+        foreach( var line in A.Lines!)
+        {
+            InvoiceLine l = new( new Guid()  );
+            foreach( var p in line.GetType().GetProperties())
+            {
+                PropertyInfo q = l!.GetType().GetProperty(p.Name)!;
+                q.SetValue( l, p!.GetValue( line, null), null);
+            }
+            B.Lines.Add(l);
+        }
+        B = new Invoice( B.Header!, B.Lines);
+    }
+}

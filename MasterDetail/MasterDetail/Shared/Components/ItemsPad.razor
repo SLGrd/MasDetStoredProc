@@ -1,0 +1,54 @@
+﻿@*@using Common.Models;  
+@using System.ComponentModel.DataAnnotations
+         
+<div class="col-md-2 flexCol" >
+    <label>Item Number </label>
+    <input type="number" style="width:100%;text-align:center;" @bind="Act.ItemNumber" />            
+</div>
+<div class="col-md-3 flexCol">
+    <label>Description</label>
+    <input type="Text" style="width:100%"   @bind="Act.Description" />               
+</div>
+<div class="col-md-1 flexCol">  
+    <label>Qtty</label>
+    <input type="Text" style="width:100%"   @bind="Act.Qtty" /> 
+</div>
+<div class="col-md-2 flexCol">
+    <label>Unit Price</label>
+    <input type="Text" style="width:100%"   @bind="Act.ItemNumber" />                
+</div>
+<div class="col-md-2 flexCol">
+    <label>Controls</label>
+    <input type="Text" style="width:100%" />                
+</div>*@
+
+<style>
+
+     .estilo{
+        width: 100%;
+        border-width: 2px;
+        border-style: none;
+        border-color: red;
+                
+        padding-bottom: 6px;         
+     }
+
+     .flexCol{          
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: center;
+        color:  black;
+        padding-bottom: 12px;
+     }
+</style>
+
+@code {    
+    //[Parameter]
+    ////public Common.Models.InvoiceLine Act { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+}
